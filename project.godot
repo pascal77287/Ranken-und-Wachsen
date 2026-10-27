@@ -1,0 +1,42 @@
+; Engine configuration file.
+
+config_version=5
+
+[application]
+
+config/name="Wachsen & Verflechten"
+config/version="0.1.0"
+run/main_scene="res://scenes/main.tscn"
+run/low_processor_mode=true
+config/quit_on_go_back=false
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://icon.svg"
+boot_splash/bg_color=Color(0.96, 0.94, 0.88, 1)
+boot_splash/show_image=false
+
+[autoload]
+
+Progress="*res://scripts/autoload/progress.gd"
+LevelDB="*res://scripts/autoload/level_db.gd"
+Sound="*res://scripts/autoload/sound.gd"
+Haptics="*res://scripts/autoload/haptics.gd"
+
+[display]
+
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/size/window_width_override=432
+window/size/window_height_override=768
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
+
+[gui]
+
+common/drop_mouse_on_gui_input_disabled=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
