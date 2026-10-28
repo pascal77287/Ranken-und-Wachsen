@@ -1,6 +1,11 @@
 {
 	"chapters": [
 		"res://levels/01_fruehlingswiese.json",
-		"res://levels/02_schattiger_wald.json"
+		"res://levels/02_schattiger_wald.json",
+		"res://levels/03_flussufer.json",
+		"res://levels/04_bergwiese.json",
+		"res://levels/05_herbstgarten.json",
+		"res://levels/06_winterhain.json",
+		"res://levels/07_sternengarten.json"
 	]
 }
