@@ -334,7 +334,7 @@ func _draw_start(i: int) -> void:
 
 func _draw_goal() -> void:
 	var c := _center(level.goal)
-	var reached := state.path_at(level.goal) != -1
+	var reached := state.finished_count() > 0
 	var open := _progress(level.goal, 0.05, 0.5) if reached else 0.0
 	if open < 1.0:
 		Art.draw_bud(self, c, _cell * 0.34 * (1.0 - open * 0.6), Art.GOAL)

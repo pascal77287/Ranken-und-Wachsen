@@ -7,7 +7,7 @@ enum Step { NONE, GROW, RETRACT, BLOCKED_STONE, BLOCKED_VINE, BLOCKED_FINISHED }
 
 var level: LevelData
 var paths: Array = []  # pro Startknospe ein Array[Vector2i], beginnt mit dem Startfeld
-var occupant := PackedInt32Array()  # pro Feld: Index der Ranke oder -1
+var occupant := PackedInt32Array()  # pro Feld: Index der Ranke oder -1 (Ziel bleibt immer -1)
 
 
 func _init(lv: LevelData) -> void:
@@ -50,7 +50,18 @@ func truncate(i: int, cell: Vector2i) -> int:
 	return removed
 
 
+## Anzahl Ranken, die in der Ziel-Knospe enden.
+func finished_count() -> int:
+	var n := 0
+	for i in paths.size():
+		if is_finished(i):
+			n += 1
+	return n
+
+
 ## Versucht, Ranke i von ihrer Spitze auf das Nachbarfeld `target` zu bewegen.
+## Die Ziel-Knospe gehört keiner Ranke allein: Jede Ranke kann von ihrer Seite
+## hineinwachsen, endet dort aber.
 func step(i: int, target: Vector2i) -> Step:
 	var path: Array = paths[i]
 	var t: Vector2i = path[-1]
@@ -67,25 +78,23 @@ func step(i: int, target: Vector2i) -> Step:
 	if occupant[level.index(target)] != -1:
 		return Step.BLOCKED_VINE
 	path.append(target)
-	occupant[level.index(target)] = i
+	if target != level.goal:
+		occupant[level.index(target)] = i
 	return Step.GROW
 
 
+## Freie Felder ohne die Ziel-Knospe.
 func free_cell_count() -> int:
 	var n := 0
 	for idx in occupant.size():
 		if occupant[idx] == -1 and level.cells[idx] != LevelData.Cell.STONE:
 			n += 1
-	return n
+	return n - 1
 
 
+## Gewonnen: alle Felder bedeckt und jede Ranke endet in der Ziel-Knospe.
 func is_won() -> bool:
-	if occupant[level.index(level.goal)] == -1:
-		return false
-	for path in paths:
-		if path.size() < 2:
-			return false
-	return free_cell_count() == 0
+	return finished_count() == paths.size() and free_cell_count() == 0
 
 
 ## Spielt eine Lösung (Array von Pfaden) nach. Leerer String = gültig.

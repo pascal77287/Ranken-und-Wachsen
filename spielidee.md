@@ -269,8 +269,8 @@ Optionale Sternen-Bewertung für das Lösen eines Levels in minimalen Zügen.
 4. Hebt der Spieler den Finger, pausiert die Ranke. Tippen auf die Rankenspitze setzt das Wachstum fort.
 5. Zurückziehen auf dem eigenen Pfad zieht die Ranke feldweise wieder ein.
 6. Die Ziel-Knospe ist ein Endpunkt: Eine Ranke, die sie erreicht, ist dort beendet und kann nicht hindurchwachsen.
-7. Im MVP darf irgendeine Ranke die Ziel-Knospe erreichen. (Später: farbgebundene Ziele und zwei Ziel-Knospen; das Level-Format ist darauf vorbereitet.)
-8. Gewinnbedingung: Alle leeren Felder sind bedeckt UND jede Startknospe hat eine Ranke UND eine Ranke endet in der Ziel-Knospe.
+7. Jede Ranke muss in der Ziel-Knospe enden. Die Ziel-Knospe nimmt mehrere Ranken auf, je eine pro Seite (oben, unten, links, rechts). Deshalb hat ein Level höchstens 4 Startknospen. (Geändert am 27.10.2026; vorher genügte eine Ranke. Später: farbgebundene Ziele und zwei Ziel-Knospen; das Level-Format ist darauf vorbereitet.)
+8. Gewinnbedingung: Alle leeren Felder sind bedeckt UND jede Ranke endet in der Ziel-Knospe.
 
 6.2 Steuerung
 

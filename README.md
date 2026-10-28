@@ -25,6 +25,7 @@ Spielidee und festgelegte Regeln: siehe `spielidee.md`.
 
 - Raster: `.` leer, `X` Stein, `Z` Ziel-Knospe, `1`–`9` Startknospen
 - `solution`: gewollte Hauptlösung pro Startknospe als Richtungen `U`/`D`/`L`/`R`
+- Jede Ranke muss in der Ziel-Knospe enden (je eine pro Seite, also höchstens 4 Startknospen)
 
 ## Befehle
 
@@ -33,6 +34,10 @@ Spielidee und festgelegte Regeln: siehe `spielidee.md`.
 ```sh
 # Alle Level prüfen (Format, Hauptlösung, Anzahl Lösungen)
 godot --headless --path . --script res://tools/validate_levels.gd
+
+# Neue Level-Kandidaten erzeugen (Python): Breite Höhe Ranken; gibt die
+# schwierigsten eindeutigen Level als JSON aus
+python tools/generate_levels.py 6 6 3 --stones 5 --attempts 5000
 
 # Regeltests
 godot --headless --path . --script res://tests/test_board.gd

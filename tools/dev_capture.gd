@@ -33,6 +33,7 @@ func _run() -> void:
 			board.queue_redraw()
 		elif mode == "win":
 			board.state.apply_solution(board.level.solution)
+			board.changed.emit()
 			board._start_win()
 			await get_tree().create_timer(0.7).timeout
 	await get_tree().create_timer(0.6).timeout

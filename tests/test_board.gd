@@ -72,12 +72,15 @@ func _test_win_conditions() -> void:
 	for c in [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]:
 		s.step(0, c)
 	_check(not s.is_won(), "nicht gewonnen: Felder frei")
-	s.reset()
 	for c in [Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1)]:
 		s.step(1, c)
-	for c in [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]:
-		s.step(0, c)
-	_check(s.is_won(), "gewonnen: alles bedeckt, alle Knospen gewachsen, Ziel erreicht")
+	_check(s.free_cell_count() == 0, "alle Felder bedeckt")
+	_check(not s.is_won(), "nicht gewonnen: Ranke 2 endet nicht in der Blüte")
+	_check(s.step(1, Vector2i(3, 0)) == BoardState.Step.GROW, "zweite Ranke darf ebenfalls in die Blüte")
+	_check(s.finished_count() == 2, "beide Ranken enden in der Blüte")
+	_check(s.is_won(), "gewonnen: alles bedeckt, jede Ranke in der Blüte")
+	s.step(1, Vector2i(3, 1))
+	_check(s.is_finished(0), "Einziehen einer Ranke lässt die andere in der Blüte")
 
 	var u := BoardState.new(_level(["1.Z", "2.."]))
 	u.step(0, Vector2i(1, 0))
@@ -99,4 +102,4 @@ func _test_truncate() -> void:
 		s.step(0, Vector2i(x, 0))
 	_check(s.truncate(0, Vector2i(1, 0)) == 2, "Kürzen entfernt Felder hinter dem Punkt")
 	_check(s.tip(0) == Vector2i(1, 0), "neue Spitze")
-	_check(s.free_cell_count() == 3, "Felder wieder frei")
+	_check(s.free_cell_count() == 2, "Felder wieder frei (ohne Ziel)")

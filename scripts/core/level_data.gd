@@ -69,6 +69,8 @@ static func from_dict(d: Dictionary) -> LevelData:
 			lv.errors.append("Startknospen müssen lückenlos ab 1 nummeriert sein")
 	if lv.starts.is_empty():
 		lv.errors.append("Keine Startknospe")
+	if lv.starts.size() > 4:
+		lv.errors.append("Höchstens 4 Startknospen (jede Ranke braucht eine Seite der Ziel-Knospe)")
 	if lv.goal == Vector2i(-1, -1):
 		lv.errors.append("Keine Ziel-Knospe")
 
