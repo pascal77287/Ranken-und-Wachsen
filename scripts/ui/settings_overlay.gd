@@ -1,6 +1,7 @@
 class_name SettingsOverlay
 extends Control
-## Unaufdringliches Holzschild mit Einstellungen (Klänge, Musik, Vibration, Reset).
+## Unaufdringliches Holzschild mit Einstellungen (Klänge, Musik, Vibration,
+## Schwierigkeit, Reset).
 
 signal closed
 
@@ -42,6 +43,14 @@ func _ready() -> void:
 	_add_toggle(box, tr("Klänge"), "sound")
 	_add_toggle(box, tr("Musik"), "music")
 	_add_toggle(box, tr("Vibration"), "haptics")
+	_add_toggle(box, tr("Keine Teilschlangen"), Progress.NO_PARTIAL)
+	var note := Label.new()
+	note.text = tr("Ranken in einem Zug bis zur Blüte ziehen. Gelöste Level blühen golden.")
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.custom_minimum_size.x = 480
+	note.add_theme_font_size_override("font_size", 24)
+	note.add_theme_color_override("font_color", Art.CREAM.darkened(0.15))
+	box.add_child(note)
 
 	_reset_button.custom_minimum_size.y = 88
 	_reset_button.pressed.connect(_on_reset)

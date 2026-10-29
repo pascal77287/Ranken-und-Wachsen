@@ -145,7 +145,7 @@ func _update_status() -> void:
 
 
 func _on_won() -> void:
-	Progress.mark_solved(_board.level.id)
+	Progress.mark_solved(_board.level.id, Progress.get_setting(Progress.NO_PARTIAL))
 	var next := LevelDB.next_of(chapter, index)
 	_next_button.visible = next.x >= 0
 	_win_panel.visible = true

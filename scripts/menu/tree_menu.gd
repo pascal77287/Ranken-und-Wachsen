@@ -239,7 +239,10 @@ func _draw_twig_and_bud(b: Dictionary, is_next: bool) -> void:
 	if is_next:
 		var pulse := 0.5 + 0.5 * sin(_time * 2.4)
 		draw_circle(tip, BUD_RADIUS * (1.35 + 0.15 * pulse), Color(1.0, 0.96, 0.75, 0.35 + 0.25 * pulse), true, -1.0, true)
-	if solved:
+	if Progress.is_solved_hard(lv.id):
+		draw_circle(tip, BUD_RADIUS * 1.35, Color(Art.GOLD, 0.25), true, -1.0, true)
+		Art.draw_blossom(self, tip, BUD_RADIUS * 1.2, Art.GOLD, 1.0, b.index * 0.4)
+	elif solved:
 		var petal: Color = chapter.color.lightened(0.35) if complete else Art.GOAL
 		Art.draw_blossom(self, tip, BUD_RADIUS * 1.2, petal, 1.0, b.index * 0.4)
 	else:

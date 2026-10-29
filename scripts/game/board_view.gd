@@ -113,7 +113,7 @@ func _gui_input(event: InputEvent) -> void:
 		if event.pressed:
 			_press(event.position)
 		else:
-			_active = -1
+			_release()
 		accept_event()
 	elif event is InputEventMouseMotion and _active >= 0:
 		_drag(event.position)
@@ -129,6 +129,20 @@ func _press(pos: Vector2) -> void:
 	_cursor = c
 	_moved = false
 	_last_blocked = Vector2i(-1, -1)
+
+
+## Im Modus „Keine Teilschlangen“ zieht sich eine Ranke ganz zurück, wenn der
+## Finger sie loslässt, bevor sie in einer Blüte angekommen ist.
+func _release() -> void:
+	var i := _active
+	_active = -1
+	if i < 0 or not Progress.get_setting(Progress.NO_PARTIAL) or state.is_finished(i):
+		return
+	if state.truncate(i, level.starts[i]) > 0:
+		Sound.retract(1)
+		Haptics.bump()
+		_animate_for(0.1)
+		changed.emit()
 
 
 func _drag(pos: Vector2) -> void:

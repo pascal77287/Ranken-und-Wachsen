@@ -22,6 +22,7 @@ const WOOD := Color("#a47148")
 const WOOD_DARK := Color("#7a5230")
 const CREAM := Color("#fbf6ea")
 const BLOSSOM_CENTER := Color("#f5d36b")
+const GOLD := Color("#e8b923")
 
 ## Rankenfarben; jede Ranke hat zusätzlich ein eigenes Symbol (Farbenblindheit).
 const VINE_COLORS: Array[Color] = [

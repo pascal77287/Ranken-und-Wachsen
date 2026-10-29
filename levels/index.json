@@ -1,6 +1,5 @@
 {
 	"chapters": [
-		"res://levels/00_test_neuheiten.json",
 		"res://levels/01_fruehlingswiese.json",
 		"res://levels/02_schattiger_wald.json",
 		"res://levels/03_flussufer.json",
