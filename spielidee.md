@@ -292,3 +292,36 @@ Optionale Sternen-Bewertung für das Lösen eines Levels in minimalen Zügen.
 - Grafik zunächst prozedural/Platzhalter, Audio aus freien Quellen (CC0).
 - Barrierefreiheit: Ranken zusätzlich zur Farbe mit Symbol/Muster unterscheidbar.
 - Vertrieb: zunächst APK zum Sideloaden; Play Store wird später entschieden.
+
+
+7\. Festgelegte Erweiterungen nach dem MVP (Stand 29.10.2026, siehe GitHub-Issues #2, #3, #4)
+
+7.1 Levelstruktur (#4)
+
+- 20 Stufen à 15 Level, also 300 Level.
+- Stufen 1–7: unverändert wie bisher (105 Level).
+- Stufen 8–15: mehrere Blüten.
+- Stufen 16–19: Kreuzungen, aber nur eine Blüte.
+- Stufe 20: Kreuzungen und mehrere Blüten kombiniert.
+
+7.2 Mehrere Blüten (ab Stufe 8)
+
+1. Ein Level hat höchstens 3 Blüten und höchstens 6 Ranken.
+2. Eine Blüte trägt 1 bis 4 Farben. Sie zeigen an, welche Ranken dort enden dürfen.
+3. Jede Ranke muss in einer Blüte ihrer Farbe enden.
+4. Eine Farbe darf auf mehreren Blüten vorkommen; die Ranke wählt dann eine davon. Farbmarkierungen, die leer bleiben, sind erlaubt.
+5. Die Seitenregel bleibt: Eine Blüte nimmt je Seite (oben, unten, links, rechts) höchstens eine Ranke auf.
+
+7.3 Kreuzungen (ab Stufe 16, #2)
+
+1. Kreuzungen sind fest auf dem Spielbrett vorgegeben. Ein Level kann mehrere Kreuzungen haben.
+2. Jede Kreuzung muss benutzt werden: Genau zwei verschiedene Ranken kreuzen sich dort, eine waagrecht und eine senkrecht. Beide laufen geradeaus durch, auf der Kreuzung wird nicht abgebogen.
+3. Eine Ranke darf sich nicht selbst kreuzen.
+4. Die Kreuzung zeigt immer die Farben der beiden Ranken, die sich dort kreuzen müssen. Welche davon waagrecht und welche senkrecht läuft, ist frei.
+
+7.4 Einstellung „Keine Teilschlangen“ (#3)
+
+- Schwierigkeitsschalter in den Einstellungen; eingeschaltet gilt er für alle Level.
+- Hebt der Spieler den Finger, bevor die Ranke in einer Blüte angekommen ist, zieht sich diese Ranke ganz in ihre Startknospe zurück. Andere Ranken bleiben stehen.
+- Zurückziehen bleibt erlaubt, auch bei fertigen Ranken. Danach muss die Ranke aber in einem Zug wieder bis in eine Blüte gezogen werden.
+- Level, die in diesem Modus gelöst wurden, zeigen am Lebensbaum eine besondere Blüte (z. B. golden; Gestaltung noch offen).
