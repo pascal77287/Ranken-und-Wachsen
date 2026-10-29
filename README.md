@@ -23,9 +23,11 @@ Spielidee und festgelegte Regeln: siehe `spielidee.md`.
  "solution": {"1": "RRDDLLU"}}
 ```
 
-- Raster: `.` leer, `X` Stein, `Z` Ziel-Knospe, `1`–`9` Startknospen
+- Raster: `.` leer, `X` Stein, `Z` Blüte (Ziel-Knospe), `1`–`6` Startknospen
 - `solution`: gewollte Hauptlösung pro Startknospe als Richtungen `U`/`D`/`L`/`R`
-- Jede Ranke muss in der Ziel-Knospe enden (je eine pro Seite, also höchstens 4 Startknospen)
+- Jede Ranke muss in einer Blüte enden, je eine pro Seite (also höchstens 4 Ranken pro Blüte)
+- Mehrere Blüten (ab Stufe 8): bis zu drei `Z` im Raster; jede Ranke darf in jede Blüte
+- Kreuzungen (ab Stufe 16): `a`–`f` im Raster, die zwei Farben unter `"crossings": {"a": "12"}`
 
 ## Befehle
 

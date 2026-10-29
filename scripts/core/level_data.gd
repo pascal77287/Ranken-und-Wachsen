@@ -2,10 +2,12 @@ class_name LevelData
 extends RefCounted
 ## Unveränderliche Beschreibung eines Levels, geladen aus JSON.
 ##
-## Rasterzeichen: "." leer, "X" Stein, "Z" Ziel-Knospe, "1".."9" Startknospen.
+## Rasterzeichen: "." leer, "X" Stein, "1".."6" Startknospen,
+## "Z" Blüte (Ziel-Knospe, bis zu drei; jede Ranke darf in jeder Blüte enden),
+## "a".."f" Kreuzungen, deren zwei Farben unter "crossings" stehen (z. B. {"a": "13"}).
 ## Die Lösung ist pro Startknospe eine Folge von Richtungen (U, D, L, R).
 
-enum Cell { EMPTY, STONE, START, GOAL }
+enum Cell { EMPTY, STONE, START, GOAL, CROSSING }
 
 const DIRS := {
 	"U": Vector2i(0, -1),
@@ -14,6 +16,9 @@ const DIRS := {
 	"R": Vector2i(1, 0),
 }
 const NEIGHBORS: Array[Vector2i] = [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]
+const MAX_STARTS := 6
+const MAX_GOALS := 3
+const CROSSING_LETTERS := "abcdef"
 
 var id := ""
 var name := ""
@@ -22,9 +27,13 @@ var width := 0
 var height := 0
 var cells := PackedInt32Array()
 var starts: Array[Vector2i] = []  # Index i = Ranke Nummer i + 1
-var goal := Vector2i(-1, -1)
+var goals: Array[Vector2i] = []
+var crossings: Array[Vector2i] = []
+var crossing_colors: Array = []  # pro Kreuzung ein Array[int] mit genau zwei Rankenindizes
 var solution: Array = []  # pro Start ein Array[Vector2i] inkl. Startfeld
 var errors := PackedStringArray()
+
+var _crossing_index := {}  # Feldindex -> Index der Kreuzung
 
 
 static func from_dict(d: Dictionary) -> LevelData:
@@ -38,6 +47,7 @@ static func from_dict(d: Dictionary) -> LevelData:
 	lv.cells.resize(lv.width * lv.height)
 
 	var start_map := {}
+	var crossing_letters: Array[String] = []
 	for y in lv.height:
 		var row := str(rows[y])
 		if row.length() != lv.width:
@@ -45,19 +55,25 @@ static func from_dict(d: Dictionary) -> LevelData:
 			continue
 		for x in lv.width:
 			var ch := row[x]
+			var p := Vector2i(x, y)
 			var cell := Cell.EMPTY
 			if ch == "X":
 				cell = Cell.STONE
 			elif ch == "Z":
 				cell = Cell.GOAL
-				if lv.goal != Vector2i(-1, -1):
-					lv.errors.append("Mehr als eine Ziel-Knospe")
-				lv.goal = Vector2i(x, y)
+				lv.goals.append(p)
+			elif CROSSING_LETTERS.contains(ch):
+				cell = Cell.CROSSING
+				if ch in crossing_letters:
+					lv.errors.append("Kreuzung %s doppelt" % ch)
+				crossing_letters.append(ch)
+				lv._crossing_index[y * lv.width + x] = lv.crossings.size()
+				lv.crossings.append(p)
 			elif ch.is_valid_int() and ch != "0":
 				cell = Cell.START
 				if start_map.has(ch.to_int()):
 					lv.errors.append("Startknospe %s doppelt" % ch)
-				start_map[ch.to_int()] = Vector2i(x, y)
+				start_map[ch.to_int()] = p
 			elif ch != ".":
 				lv.errors.append("Unbekanntes Zeichen '%s' bei (%d,%d)" % [ch, x, y])
 			lv.cells[y * lv.width + x] = cell
@@ -69,10 +85,21 @@ static func from_dict(d: Dictionary) -> LevelData:
 			lv.errors.append("Startknospen müssen lückenlos ab 1 nummeriert sein")
 	if lv.starts.is_empty():
 		lv.errors.append("Keine Startknospe")
-	if lv.starts.size() > 4:
-		lv.errors.append("Höchstens 4 Startknospen (jede Ranke braucht eine Seite der Ziel-Knospe)")
-	if lv.goal == Vector2i(-1, -1):
+	if lv.starts.size() > MAX_STARTS:
+		lv.errors.append("Höchstens %d Startknospen" % MAX_STARTS)
+	if lv.goals.is_empty():
 		lv.errors.append("Keine Ziel-Knospe")
+	if lv.goals.size() > MAX_GOALS:
+		lv.errors.append("Höchstens %d Blüten" % MAX_GOALS)
+	if lv.starts.size() > 4 * lv.goals.size():
+		lv.errors.append("Zu viele Startknospen (jede Ranke braucht eine Seite einer Blüte)")
+
+	var crossing_spec: Dictionary = d.get("crossings", {})
+	for letter in crossing_letters:
+		var colors := lv._parse_colors(str(crossing_spec.get(letter, "")), "Kreuzung " + letter)
+		if colors.size() != 2:
+			lv.errors.append("Kreuzung %s braucht genau zwei verschiedene Farben" % letter)
+		lv.crossing_colors.append(colors)
 
 	var sol: Dictionary = d.get("solution", {})
 	for i in lv.starts.size():
@@ -84,6 +111,18 @@ static func from_dict(d: Dictionary) -> LevelData:
 			path.append(path[-1] + DIRS[m])
 		lv.solution.append(path)
 	return lv
+
+
+## "13" -> [0, 2]; meldet Ranken, die es nicht gibt.
+func _parse_colors(spec: String, what: String) -> Array[int]:
+	var result: Array[int] = []
+	for ch in spec:
+		var n := ch.to_int() if ch.is_valid_int() else 0
+		if n < 1 or n > starts.size():
+			errors.append("%s: Ranke '%s' gibt es nicht" % [what, ch])
+		elif not (n - 1) in result:
+			result.append(n - 1)
+	return result
 
 
 func in_bounds(p: Vector2i) -> bool:
@@ -100,3 +139,12 @@ func cell_at(p: Vector2i) -> int:
 
 func is_passable(p: Vector2i) -> bool:
 	return in_bounds(p) and cells[index(p)] != Cell.STONE
+
+
+func is_goal(p: Vector2i) -> bool:
+	return cell_at(p) == Cell.GOAL
+
+
+## Index der Kreuzung auf Feld p oder -1.
+func crossing_at(p: Vector2i) -> int:
+	return _crossing_index.get(index(p), -1) if in_bounds(p) else -1

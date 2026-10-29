@@ -13,6 +13,8 @@ func _initialize() -> void:
 	_test_goal_is_endpoint()
 	_test_win_conditions()
 	_test_truncate()
+	_test_multiple_goals()
+	_test_crossings()
 	print("\n%s" % ("Alle Tests bestanden." if _failures == 0 else "%d Test(s) fehlgeschlagen." % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -25,8 +27,10 @@ func _check(cond: bool, what: String) -> void:
 		print("  FAIL " + what)
 
 
-func _level(grid: Array) -> LevelData:
-	return LevelData.from_dict({"id": "t", "grid": grid, "solution": {}})
+func _level(grid: Array, extra := {}) -> LevelData:
+	var d := {"id": "t", "grid": grid, "solution": {}}
+	d.merge(extra)
+	return LevelData.from_dict(d)
 
 
 func _test_grow_and_retract() -> void:
@@ -103,3 +107,43 @@ func _test_truncate() -> void:
 	_check(s.truncate(0, Vector2i(1, 0)) == 2, "Kürzen entfernt Felder hinter dem Punkt")
 	_check(s.tip(0) == Vector2i(1, 0), "neue Spitze")
 	_check(s.free_cell_count() == 2, "Felder wieder frei (ohne Ziel)")
+
+
+func _test_multiple_goals() -> void:
+	print("Mehrere Blüten")
+	var lv := _level(["1.Z", "2.Z"])
+	_check(lv.errors.is_empty(), "Level mit zwei Blüten ist gültig")
+	var s := BoardState.new(lv)
+	s.step(0, Vector2i(1, 0))
+	_check(s.step(0, Vector2i(2, 0)) == BoardState.Step.GROW, "Ranke 1 endet in der oberen Blüte")
+	s.step(1, Vector2i(1, 1))
+	_check(s.step(1, Vector2i(2, 1)) == BoardState.Step.GROW, "Ranke 2 endet in der unteren Blüte")
+	_check(s.is_won(), "gewonnen, obwohl jede Blüte nur eine Ranke hat")
+	var t := BoardState.new(_level(["1Z.", ".2Z"]))
+	t.step(1, Vector2i(1, 0))
+	_check(t.is_finished(1), "jede Ranke darf in jede Blüte")
+	_check(not _level(["1Z.Z.Z.Z"]).errors.is_empty(), "höchstens 3 Blüten")
+	_check(not _level(["12345", "Z...."]).errors.is_empty(), "eine Blüte nimmt höchstens 4 Ranken auf")
+
+
+func _test_crossings() -> void:
+	print("Kreuzungen")
+	var lv := _level([".1.", "2a.", ".Z."], {"crossings": {"a": "12"}})
+	_check(lv.errors.is_empty(), "Level mit Kreuzung ist gültig")
+	var s := BoardState.new(lv)
+	_check(s.step(1, Vector2i(1, 1)) == BoardState.Step.GROW, "waagrecht auf die Kreuzung")
+	_check(s.step(1, Vector2i(1, 2)) == BoardState.Step.BLOCKED_STRAIGHT, "auf der Kreuzung nicht abbiegen")
+	_check(s.step(1, Vector2i(2, 1)) == BoardState.Step.GROW, "geradeaus weiter")
+	_check(s.step(0, Vector2i(1, 1)) == BoardState.Step.GROW, "zweite Ranke senkrecht über die Kreuzung")
+	_check(s.free_cell_count() == 4, "Kreuzung ist nach zwei Durchgängen bedeckt")
+	_check(s.step(0, Vector2i(1, 0)) == BoardState.Step.RETRACT, "zurückziehen gibt die Kreuzung frei")
+	_check(s.crossing_use[0] == [1, -1], "nur die senkrechte Spur ist wieder frei")
+
+	var t := BoardState.new(_level(["2..", "1a.", "...", ".Z."], {"crossings": {"a": "12"}}))
+	t.step(0, Vector2i(1, 1))
+	t.step(0, Vector2i(2, 1))
+	t.step(0, Vector2i(2, 0))
+	t.step(0, Vector2i(1, 0))
+	_check(t.step(0, Vector2i(1, 1)) == BoardState.Step.BLOCKED_VINE, "eine Ranke kreuzt sich nicht selbst")
+	var u := BoardState.new(_level(["13.", ".a.", ".Z2"], {"crossings": {"a": "12"}}))
+	_check(u.step(2, Vector2i(1, 1)) == BoardState.Step.BLOCKED_COLOR, "Kreuzung nur für ihre Farben")

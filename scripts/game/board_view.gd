@@ -190,7 +190,7 @@ func _on_grow(c: Vector2i) -> void:
 	Sound.grow(state.paths[_active].size())
 	Haptics.tick()
 	_spawn_particles(_center(c), Art.vine_color(_active).lightened(0.3), 5)
-	if c == level.goal:
+	if level.is_goal(c):
 		Sound.goal_reached()
 		_spawn_particles(_center(c), Art.GOAL_LIGHT, 10)
 	_animate_for(LEAF_TIME + 0.2)
@@ -258,7 +258,8 @@ func _draw() -> void:
 		_draw_vine(i)
 	for i in level.starts.size():
 		_draw_start(i)
-	_draw_goal()
+	for g in level.goals.size():
+		_draw_goal(g)
 	if _won:
 		_draw_win()
 	for p in _particles:
@@ -270,6 +271,10 @@ func _draw_cell(c: Vector2i) -> void:
 	var rect := Rect2(_origin + Vector2(c) * _cell, Vector2.ONE * _cell).grow(-_cell * 0.045)
 	if level.cell_at(c) == LevelData.Cell.STONE:
 		Art.draw_stone(self, _center(c), _cell * 0.36, c.x * 31 + c.y * 17 + 3)
+		return
+	var k := level.crossing_at(c)
+	if k >= 0:
+		_draw_crossing(k, rect)
 		return
 	var owner_idx := state.path_at(c)
 	var color := Art.CELL
@@ -314,7 +319,7 @@ func _draw_vine(i: int) -> void:
 	draw_polyline(pts, color, width, true)
 	for p in pts:
 		draw_circle(p, width / 2.0, color, true, -1.0, true)
-	if path[-1] != level.goal:
+	if not level.is_goal(path[-1]):
 		draw_circle(pts[-1], width * 1.05, color.lightened(0.3), true, -1.0, true)
 		Art.draw_symbol(self, i, pts[-1], width * 0.55, color.darkened(0.25))
 
@@ -332,10 +337,37 @@ func _draw_start(i: int) -> void:
 	Art.draw_symbol(self, i, c, r * 0.42, Art.CREAM)
 
 
-func _draw_goal() -> void:
-	var c := _center(level.goal)
-	var reached := state.finished_count() > 0
-	var open := _progress(level.goal, 0.05, 0.5) if reached else 0.0
+## Farbmarke einer Ranke (Farbe plus Symbol) für Kreuzungen.
+func _draw_badge(i: int, at: Vector2) -> void:
+	var r := _cell * 0.11
+	draw_circle(at, r, Art.vine_color(i), true, -1.0, true)
+	Art.draw_symbol(self, i, at, r * 0.6, Art.CREAM)
+
+
+## Kreuzung: Kreuz auf dem Feld, die beiden Farbmarken in gegenüberliegenden Ecken.
+func _draw_crossing(k: int, rect: Rect2) -> void:
+	var c := _center(level.crossings[k])
+	var use: Array = state.crossing_use[k]
+	_cell_box.bg_color = Art.CELL.darkened(0.04) if use.has(-1) else Art.CELL.lerp(Art.GOAL_LIGHT, 0.4)
+	draw_style_box(_cell_box, rect)
+	var arm := _cell * 0.36
+	var w := _cell * 0.16
+	draw_line(c - Vector2(arm, 0), c + Vector2(arm, 0), Art.CELL_EDGE, w, true)
+	draw_line(c - Vector2(0, arm), c + Vector2(0, arm), Art.CELL_EDGE, w, true)
+	var colors: Array = level.crossing_colors[k]
+	var corner := _cell * 0.3
+	for n in colors.size():
+		var s := -1.0 if n == 0 else 1.0
+		_draw_badge(colors[n], c + Vector2(s, s) * corner)
+
+
+func _draw_goal(g: int) -> void:
+	var cell: Vector2i = level.goals[g]
+	var c := _center(cell)
+	var reached := false
+	for i in state.paths.size():
+		reached = reached or state.tip(i) == cell
+	var open := _progress(cell, 0.05, 0.5) if reached else 0.0
 	if open < 1.0:
 		Art.draw_bud(self, c, _cell * 0.34 * (1.0 - open * 0.6), Art.GOAL)
 	if open > 0.0:
@@ -344,14 +376,14 @@ func _draw_goal() -> void:
 
 func _draw_win() -> void:
 	var t := _time - _win_start
-	var center := _center(level.goal)
+	var center := _center(level.goals[0])
 	var reach := Vector2(level.width, level.height).length() * _cell
 	var radius := t / (WIN_TIME * 0.6) * reach
 	for y in level.height:
 		for x in level.width:
 			var c := Vector2i(x, y)
 			var owner_idx := state.path_at(c)
-			if owner_idx < 0 or c == level.goal:
+			if owner_idx < 0 or level.is_goal(c):
 				continue
 			var dist := _center(c).distance_to(center)
 			var open := clampf((radius - dist) / (_cell * 1.2), 0.0, 1.0)

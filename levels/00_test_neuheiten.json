@@ -1,0 +1,18 @@
+{
+	"id": "test_neuheiten",
+	"name": "Test: Neuheiten",
+	"color": "#c9a227",
+	"levels": [
+		{"id": "T-1", "name": "Test Kreuzung", "hint": "Beide Ranken kreuzen sich geradeaus.",
+		 "grid": ["1....", ".2...", "..a..", "...XZ", "....."],
+		 "crossings": {"a": "12"},
+		 "solution": {"1": "DDRRRRD", "2": "URRRDLLDDLLDRRRRU"}},
+		{"id": "T-2", "name": "Test Blüten", "hint": "Zwei Blüten – jede Ranke darf in jede.",
+		 "grid": ["1...Z", ".....", "2....", "3....", ".....", "....Z"],
+		 "solution": {"1": "DRURDRUR", "2": "RRRRUU", "3": "DDRUURDDRUURDD"}},
+		{"id": "T-3", "name": "Test kombiniert", "hint": "Kreuzung und zwei Blüten.",
+		 "grid": ["....Z", ".....", "2.a..", "3....", "..1..", "....Z"],
+		 "crossings": {"a": "12"},
+		 "solution": {"1": "RULUULLURRRDRU", "2": "RRRRDDD", "3": "RDLDRRRR"}}
+	]
+}
