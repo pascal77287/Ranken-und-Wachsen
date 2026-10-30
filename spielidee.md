@@ -299,12 +299,14 @@ Optionale Sternen-Bewertung für das Lösen eines Levels in minimalen Zügen.
 7.1 Levelstruktur (#4)
 
 - 20 Stufen à 15 Level, also 300 Level.
-- Stufen 1–7: unverändert wie bisher (105 Level).
-- Stufen 8–15: mehrere Blüten.
-- Stufen 16–19: Kreuzungen, aber nur eine Blüte.
-- Stufe 20: Kreuzungen und mehrere Blüten kombiniert.
+- Die Level sind nach Schwierigkeit (Suchaufwand des Solvers) aufsteigend sortiert. Stufen 1–2 sind die Einführung und bleiben fest.
+- Eine neue Mechanik beginnt immer mit Level 1 einer Stufe, nie mitten in einer Stufe. Danach mischen sich die Level-Arten nach Schwierigkeit; einzelne Level einer höheren Stufe können leichter sein als Level der Stufe davor.
+- Stufe 3: Einführung mehrerer Blüten.
+- Stufe 7: Einführung der Kreuzungen (mit einer Blüte).
+- Stufe 15: Kreuzungen und mehrere Blüten kombiniert.
+- (Neu sortiert am 30.10.2026; ursprünglich mehrere Blüten ab Stufe 8, Kreuzungen ab 16, Kombination in 20.)
 
-7.2 Mehrere Blüten (ab Stufe 8)
+7.2 Mehrere Blüten (ab Stufe 3)
 
 1. Ein Level hat höchstens 3 Blüten und höchstens 6 Ranken.
 2. Blüten haben keine Farben: Jede Ranke darf in jeder Blüte enden. (Geändert am 29.10.2026; Farbmarken an den Blüten machten die Level zu einfach.)
@@ -312,7 +314,7 @@ Optionale Sternen-Bewertung für das Lösen eines Levels in minimalen Zügen.
 4. Jede Blüte muss erblühen: In jeder Blüte endet mindestens eine Ranke. Ein Level hat deshalb mindestens so viele Ranken wie Blüten. (Festgelegt am 30.10.2026.)
 5. Die Seitenregel bleibt: Eine Blüte nimmt je Seite (oben, unten, links, rechts) höchstens eine Ranke auf.
 
-7.3 Kreuzungen (ab Stufe 16, #2)
+7.3 Kreuzungen (ab Stufe 7, #2)
 
 1. Kreuzungen sind fest auf dem Spielbrett vorgegeben. Ein Level kann mehrere Kreuzungen haben.
 2. Jede Kreuzung muss benutzt werden: Genau zwei verschiedene Ranken kreuzen sich dort, eine waagrecht und eine senkrecht. Beide laufen geradeaus durch, auf der Kreuzung wird nicht abgebogen.
