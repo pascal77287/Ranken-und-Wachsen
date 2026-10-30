@@ -38,6 +38,7 @@ func _initialize() -> void:
 				continue
 
 			var solver := LevelSolver.new(lv)
+			solver.node_limit = 20_000_000  # die schwersten Level brauchen über 5 Mio. Knoten
 			var count := solver.count_solutions()
 			var info := "eindeutig" if count == 1 else "mehrere Lösungen"
 			if solver.aborted:
