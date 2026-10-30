@@ -5,6 +5,7 @@ extends Node
 ## Aufruf:
 ##   godot --path . --resolution 540x960 -- --capture <datei.png> [kapitel level [modus]]
 ## Modus: "half" = Hauptlösung zur Hälfte gelegt, "win" = gelöst mit Gewinn-Animation.
+## Mit "--hires" wird unabhängig von der Bildschirmgrösse in 1080x1920 gerendert (Store-Bilder).
 
 
 func _ready() -> void:
@@ -15,7 +16,21 @@ func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	args = args.slice(args.find("--capture") + 1)
 	var out := args[0] if args.size() > 0 else "user://screenshot.png"
+	var hires := "--hires" in args
+	args = Array(args).filter(func(a): return a != "--hires")
 	var main := get_parent()
+	var target := get_viewport()
+	if hires:
+		var sv := SubViewport.new()
+		sv.size = Vector2i(1080, 1920)
+		sv.size_2d_override = Vector2i(720, 1280)
+		sv.size_2d_override_stretch = true
+		sv.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		get_tree().root.add_child(sv)
+		reparent(get_tree().root)  # dieses Werkzeug nicht mit verschieben
+		main.reparent(sv, false)
+		main.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		target = sv
 	for i in 5:
 		await get_tree().process_frame
 
@@ -37,6 +52,6 @@ func _run() -> void:
 			board._start_win()
 			await get_tree().create_timer(0.7).timeout
 	await get_tree().create_timer(0.6).timeout
-	get_viewport().get_texture().get_image().save_png(out)
+	target.get_texture().get_image().save_png(out)
 	print("Gespeichert: ", out)
 	get_tree().quit()
