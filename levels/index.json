@@ -7,6 +7,18 @@
 		"res://levels/05_herbstgarten.json",
 		"res://levels/06_winterhain.json",
 		"res://levels/07_sternengarten.json",
-		"res://levels/08_rosengarten.json"
+		"res://levels/08_rosengarten.json",
+		"res://levels/09_seerosenteich.json",
+		"res://levels/10_mohnfeld.json",
+		"res://levels/11_kraeutergarten.json",
+		"res://levels/12_orchideenhaus.json",
+		"res://levels/13_kirschbluete.json",
+		"res://levels/14_sonnenhang.json",
+		"res://levels/15_regenwald.json",
+		"res://levels/16_bambushain.json",
+		"res://levels/17_wuestenbluete.json",
+		"res://levels/18_moorland.json",
+		"res://levels/19_nordlicht.json",
+		"res://levels/20_paradiesgarten.json"
 	]
 }

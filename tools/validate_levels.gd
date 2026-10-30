@@ -2,7 +2,8 @@ extends SceneTree
 ## Prüft alle Level: Format, Hauptlösung und Anzahl Lösungen (nur zur Info).
 ##
 ## Aufruf:
-##   godot --headless --path . --script res://tools/validate_levels.gd
+##   godot --headless --path . --script res://tools/validate_levels.gd [-- 09_ 10_]
+## Optional nach "--": nur Kapitel prüfen, deren Dateiname einen der Teile enthält.
 
 const INDEX_PATH := "res://levels/index.json"
 
@@ -11,7 +12,10 @@ func _initialize() -> void:
 	var failed := 0
 	var total := 0
 	var index: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(INDEX_PATH))
+	var only := OS.get_cmdline_user_args()
 	for chapter_path in index.chapters:
+		if not only.is_empty() and not Array(only).any(func(part): return part in chapter_path):
+			continue
 		var chapter: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(chapter_path))
 		print("== %s (%s)" % [chapter.name, chapter_path])
 		var ids := {}

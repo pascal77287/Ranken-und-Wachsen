@@ -13,7 +13,7 @@ Spielidee und festgelegte Regeln: siehe `spielidee.md`.
 | `scripts/ui/` | `Art` (Farben, Zeichenroutinen), Theme, Knöpfe, Einstellungen |
 | `scripts/autoload/` | Globale Dienste: `Progress` (Spielstand), `LevelDB`, `Sound` (prozedurale Klänge), `Haptics` |
 | `levels/` | Level als JSON, ein File pro Kapitel; Reihenfolge in `index.json` |
-| `tools/`, `tests/` | Entwicklerwerkzeuge, werden nicht exportiert |
+| `tools/`, `tests/` | Entwicklerwerkzeuge (Godot-Skripte, Level-Generator in Node.js), werden nicht exportiert |
 
 ## Level-Format
 
@@ -34,14 +34,19 @@ Spielidee und festgelegte Regeln: siehe `spielidee.md`.
 `godot` steht hier für `Godot_v4.7.2-stable_win64_console.exe`.
 
 ```sh
-# Alle Level prüfen (Format, Hauptlösung, Anzahl Lösungen)
+# Alle Level prüfen (Format, Hauptlösung, Anzahl Lösungen); optional nur einzelne Kapitel
 godot --headless --path . --script res://tools/validate_levels.gd
+godot --headless --path . --script res://tools/validate_levels.gd -- 09_ 10_
 
-# Neue Level-Kandidaten erzeugen (Python): Breite Höhe Ranken; gibt die
-# schwierigsten eindeutigen Level als JSON aus
-python tools/generate_levels.py 6 6 3 --stones 5 --attempts 5000
-# mit mehreren Blüten; --stream gibt jeden Fund sofort aus
-python tools/generate_levels.py 6 7 3 --goals 2 --stones 8 --attempts 25000 --stream
+# Neue Level-Kandidaten erzeugen (Node.js): Breite Höhe Ranken; gibt jeden
+# eindeutigen Fund sofort als JSON-Zeile aus ("nodes" = Suchaufwand des Solvers,
+# identisch mit dem Prüfwerkzeug). --full: jede freie Seite jeder Blüte bekommt
+# eine Ranke; --climb N: Fund mit N kleinen Änderungen schwerer machen
+node tools/generate_levels.mjs 7 7 5 --goals 2 --stones 9 --full --climb 1000 --min-nodes 150000
+# mit Kreuzungen
+node tools/generate_levels.mjs 7 7 4 --crossings 2 --stones 8 --full --climb 1000
+# vorhandene Funde weiter verschärfen
+node tools/generate_levels.mjs 0 0 0 --refine funde.jsonl --climb 2500 --min-nodes 650000
 
 # Regeltests
 godot --headless --path . --script res://tests/test_board.gd
