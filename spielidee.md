@@ -309,7 +309,8 @@ Optionale Sternen-Bewertung für das Lösen eines Levels in minimalen Zügen.
 1. Ein Level hat höchstens 3 Blüten und höchstens 6 Ranken.
 2. Blüten haben keine Farben: Jede Ranke darf in jeder Blüte enden. (Geändert am 29.10.2026; Farbmarken an den Blüten machten die Level zu einfach.)
 3. Jede Ranke muss in einer Blüte enden.
-4. Die Seitenregel bleibt: Eine Blüte nimmt je Seite (oben, unten, links, rechts) höchstens eine Ranke auf.
+4. Jede Blüte muss erblühen: In jeder Blüte endet mindestens eine Ranke. Ein Level hat deshalb mindestens so viele Ranken wie Blüten. (Festgelegt am 30.10.2026.)
+5. Die Seitenregel bleibt: Eine Blüte nimmt je Seite (oben, unten, links, rechts) höchstens eine Ranke auf.
 
 7.3 Kreuzungen (ab Stufe 16, #2)
 

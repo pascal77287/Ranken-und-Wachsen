@@ -6,6 +6,7 @@
 		"res://levels/04_bergwiese.json",
 		"res://levels/05_herbstgarten.json",
 		"res://levels/06_winterhain.json",
-		"res://levels/07_sternengarten.json"
+		"res://levels/07_sternengarten.json",
+		"res://levels/08_rosengarten.json"
 	]
 }

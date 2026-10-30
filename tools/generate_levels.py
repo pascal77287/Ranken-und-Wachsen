@@ -1,13 +1,15 @@
 """Erzeugt Level-Kandidaten für Wachsen & Verflechten und bewertet sie.
 
-Die Ranken werden rückwärts von der Ziel-Knospe aus gelegt (zufällige Wege mit
+Die Ranken werden rückwärts von den Blüten aus gelegt (zufällige Wege mit
 Warnsdorff-Vorliebe); übrig bleibende Felder werden zu Steinen. Ein Löser mit
 denselben Regeln wie LevelSolver zählt die Lösungen (bis 2) und misst den
 Suchaufwand als grobes Mass für die Schwierigkeit.
 
 Aufruf:
-    python tools/generate_levels.py BREITE HOEHE RANKEN [--stones N] [--min-stones N]
+    python tools/generate_levels.py BREITE HOEHE RANKEN [--goals N] [--stones N] [--min-stones N]
         [--tries N] [--attempts N] [--seed N] [--show N] [--min-len N] [--nodes N]
+
+Mit --goals N (bis 3) entstehen mehrere Blüten; jede bekommt mindestens eine Ranke.
 
 Ausgabe: die besten eindeutigen Kandidaten als JSON-Zeilen im Level-Format.
 """
@@ -21,22 +23,35 @@ DIRS = {"U": (0, -1), "D": (0, 1), "L": (-1, 0), "R": (1, 0)}
 NEIGH = [(0, -1), (1, 0), (0, 1), (-1, 0)]
 
 
-def generate(w, h, k, max_stones, rng, min_len=4):
+def generate(w, h, k, max_stones, rng, min_len=4, n_goals=1):
     cells = {(x, y) for x in range(w) for y in range(h)}
     # Einige Steine vorab setzen; sie machen Lösungen oft eindeutig.
     for _ in range(rng.randint(0, max_stones // 2)):
         cells.discard((rng.randrange(w), rng.randrange(h)))
-    goal = (rng.randrange(w), rng.randrange(h))
-    if goal not in cells:
+    goals = []
+    for _ in range(n_goals):
+        g = (rng.randrange(w), rng.randrange(h))
+        if g not in cells or any(abs(g[0] - o[0]) + abs(g[1] - o[1]) < 3 for o in goals):
+            return None
+        goals.append(g)
+    used = set(goals)
+    entries = []  # pro Blüte die freien Nachbarfelder
+    for g in goals:
+        e = [(g[0] + dx, g[1] + dy) for dx, dy in NEIGH]
+        e = [c for c in e if c in cells and c not in used]
+        rng.shuffle(e)
+        entries.append(e)
+    if any(not e for e in entries):
         return None
-    entries = [(goal[0] + dx, goal[1] + dy) for dx, dy in NEIGH]
-    entries = [c for c in entries if c in cells]
-    if len(entries) < k:
+    # Jede Blüte bekommt eine Ranke, die übrigen verteilen sich zufällig.
+    chosen = [e.pop() for e in entries]
+    rest = [c for e in entries for c in e if c not in chosen]
+    rng.shuffle(rest)
+    chosen += rest[: k - len(chosen)]
+    if len(chosen) < k or len(set(chosen)) < k:
         return None
-    rng.shuffle(entries)
-    used = {goal}
     paths = []
-    for e in entries[:k]:
+    for e in chosen:
         paths.append([e])
         used.add(e)
 
@@ -66,11 +81,14 @@ def generate(w, h, k, max_stones, rng, min_len=4):
     grid = [["." for _ in range(w)] for _ in range(h)]
     for x, y in stones:
         grid[y][x] = "X"
-    grid[goal[1]][goal[0]] = "Z"
+    for g in goals:
+        grid[g[1]][g[0]] = "Z"
     # Startknospen in Lesereihenfolge nummerieren.
     order = sorted(range(k), key=lambda i: (paths[i][-1][1], paths[i][-1][0]))
     solution = {}
     for n, i in enumerate(order, 1):
+        first = paths[i][0]
+        goal = next(g for g in goals if abs(g[0] - first[0]) + abs(g[1] - first[1]) == 1)
         p = list(reversed(paths[i])) + [goal]
         sx, sy = p[0]
         grid[sy][sx] = str(n)
@@ -124,12 +142,13 @@ class Solver:
         self.w = len(grid[0])
         self.passable = set()
         self.starts = {}
+        self.goals = set()
         for y, row in enumerate(grid):
             for x, ch in enumerate(row):
                 if ch != "X":
                     self.passable.add((x, y))
                 if ch == "Z":
-                    self.goal = (x, y)
+                    self.goals.add((x, y))
                 elif ch.isdigit():
                     self.starts[int(ch)] = (x, y)
         self.starts = [self.starts[n] for n in sorted(self.starts)]
@@ -157,7 +176,7 @@ class Solver:
             m = (c[0] + dx, c[1] + dy)
             if m not in self.passable:
                 continue
-            if m == self.goal:
+            if m in self.goals:
                 goal = 1
                 continue
             o = self.occ[m]
@@ -167,25 +186,26 @@ class Solver:
 
     def _goal_ok(self, active, tip):
         open_ = 0
-        for dx, dy in NEIGH:
-            m = (self.goal[0] + dx, self.goal[1] + dy)
-            if m not in self.passable:
-                continue
-            o = self.occ[m]
-            if o == -1 or (m == tip and o == active) or (o > active and len(self.paths[o]) == 1):
-                open_ += 1
+        for g in self.goals:
+            for dx, dy in NEIGH:
+                m = (g[0] + dx, g[1] + dy)
+                if m not in self.passable or m in self.goals:
+                    continue
+                o = self.occ[m]
+                if o == -1 or (m == tip and o == active) or (o > active and len(self.paths[o]) == 1):
+                    open_ += 1
         return open_ >= self.k - active
 
     def _local_ok(self, n, i):
         for dx, dy in NEIGH:
             m = (n[0] + dx, n[1] + dy)
-            if m != self.goal and m in self.passable and self.occ[m] == -1 and not self._links(m, i, n):
+            if m not in self.goals and m in self.passable and self.occ[m] == -1 and not self._links(m, i, n):
                 return False
         return self._goal_ok(i, n)
 
     def _feasible(self, active, tip):
         for c in self.passable:
-            if c != self.goal and self.occ[c] == -1 and not self._links(c, active, tip):
+            if c not in self.goals and self.occ[c] == -1 and not self._links(c, active, tip):
                 return False
         return self._goal_ok(active, tip)
 
@@ -197,9 +217,12 @@ class Solver:
             raise _Abort()
         path = self.paths[i]
         t = path[-1]
-        if t == self.goal:
+        if t in self.goals:
+            reached = {p[-1] for p in self.paths[: i + 1]}
+            if len(self.goals - reached) > self.k - i - 1:
+                return  # jede Blüte muss erblühen
             if i + 1 == self.k:
-                if all(o != -1 for c, o in self.occ.items() if c != self.goal):
+                if all(o != -1 for c, o in self.occ.items() if c not in self.goals):
                     self.solutions += 1
                 return
             if self._feasible(i + 1, self.paths[i + 1][0]):
@@ -209,7 +232,7 @@ class Solver:
             n = (t[0] + dx, t[1] + dy)
             if n not in self.passable:
                 continue
-            if n == self.goal:
+            if n in self.goals:
                 path.append(n)
                 self._extend(i)
                 path.pop()
@@ -239,6 +262,7 @@ def main():
     ap.add_argument("w", type=int)
     ap.add_argument("h", type=int)
     ap.add_argument("k", type=int)
+    ap.add_argument("--goals", type=int, default=1)
     ap.add_argument("--stones", type=int, default=3)
     ap.add_argument("--min-stones", type=int, default=0)
     ap.add_argument("--tries", type=int, default=400)
@@ -247,6 +271,7 @@ def main():
     ap.add_argument("--min-len", type=int, default=4)
     ap.add_argument("--nodes", type=int, default=300_000)
     ap.add_argument("--attempts", type=int, default=5000)
+    ap.add_argument("--stream", action="store_true", help="jeden Fund sofort ausgeben (unsortiert)")
     a = ap.parse_args()
     rng = random.Random(a.seed)
     seen = set()
@@ -254,7 +279,7 @@ def main():
     for _ in range(a.attempts):
         if len(found) >= a.tries:
             break
-        lv = generate(a.w, a.h, a.k, a.stones, rng, a.min_len)
+        lv = generate(a.w, a.h, a.k, a.stones, rng, a.min_len, a.goals)
         if lv is None:
             continue
         stones = sum(r.count("X") for r in lv["grid"])
@@ -264,9 +289,11 @@ def main():
         count, nodes, aborted = difficulty(lv["grid"], a.nodes)
         if count == 1 and not aborted:
             found.append((nodes, lv))
+            if a.stream:
+                print(json.dumps({"nodes": nodes, **lv}, ensure_ascii=False), flush=True)
     found.sort(key=lambda f: -f[0])
     print(f"{len(found)} eindeutige Kandidaten", file=sys.stderr)
-    for nodes, lv in found[: a.show]:
+    for nodes, lv in ([] if a.stream else found[: a.show]):
         print(json.dumps({"nodes": nodes, **lv}, ensure_ascii=False))
 
 

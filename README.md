@@ -26,7 +26,7 @@ Spielidee und festgelegte Regeln: siehe `spielidee.md`.
 - Raster: `.` leer, `X` Stein, `Z` Blüte (Ziel-Knospe), `1`–`6` Startknospen
 - `solution`: gewollte Hauptlösung pro Startknospe als Richtungen `U`/`D`/`L`/`R`
 - Jede Ranke muss in einer Blüte enden, je eine pro Seite (also höchstens 4 Ranken pro Blüte)
-- Mehrere Blüten (ab Stufe 8): bis zu drei `Z` im Raster; jede Ranke darf in jede Blüte
+- Mehrere Blüten (ab Stufe 8): bis zu drei `Z` im Raster; jede Ranke darf in jede Blüte, jede Blüte braucht mindestens eine Ranke
 - Kreuzungen (ab Stufe 16): `a`–`f` im Raster, die zwei Farben unter `"crossings": {"a": "12"}`
 
 ## Befehle
@@ -40,6 +40,8 @@ godot --headless --path . --script res://tools/validate_levels.gd
 # Neue Level-Kandidaten erzeugen (Python): Breite Höhe Ranken; gibt die
 # schwierigsten eindeutigen Level als JSON aus
 python tools/generate_levels.py 6 6 3 --stones 5 --attempts 5000
+# mit mehreren Blüten; --stream gibt jeden Fund sofort aus
+python tools/generate_levels.py 6 7 3 --goals 2 --stones 8 --attempts 25000 --stream
 
 # Regeltests
 godot --headless --path . --script res://tests/test_board.gd

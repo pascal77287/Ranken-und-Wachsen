@@ -135,9 +135,19 @@ func free_cell_count() -> int:
 	return n
 
 
-## Gewonnen: alle Felder bedeckt, alle Kreuzungen benutzt, jede Ranke endet in einer Blüte.
+## Anzahl Blüten, in der noch keine Ranke endet.
+func closed_goal_count() -> int:
+	var n := 0
+	for g in level.goals:
+		if not paths.any(func(p): return p[-1] == g):
+			n += 1
+	return n
+
+
+## Gewonnen: alle Felder bedeckt, alle Kreuzungen benutzt, jede Ranke endet in
+## einer Blüte und jede Blüte ist erblüht.
 func is_won() -> bool:
-	return finished_count() == paths.size() and free_cell_count() == 0
+	return finished_count() == paths.size() and free_cell_count() == 0 and closed_goal_count() == 0
 
 
 ## Spielt eine Lösung (Array von Pfaden) nach. Leerer String = gültig.

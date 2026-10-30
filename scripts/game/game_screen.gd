@@ -133,6 +133,7 @@ func _update_status() -> void:
 		return
 	var free := _board.state.free_cell_count()
 	var missing := _board.state.paths.size() - _board.state.finished_count()
+	var closed := _board.state.closed_goal_count()
 	var line := ""
 	if free > 0:
 		line = tr("Noch %d Felder frei") % free if free != 1 else tr("Noch 1 Feld frei")
@@ -141,6 +142,8 @@ func _update_status() -> void:
 			line = tr("Die Ranke muss die Blüte erreichen")
 		else:
 			line = tr("Noch %d Ranken bis zur Blüte") % missing if missing != 1 else tr("Noch 1 Ranke bis zur Blüte")
+	elif closed > 0:
+		line = tr("Noch %d Blüten ohne Ranke") % closed if closed != 1 else tr("Noch 1 Blüte ohne Ranke")
 	_status.text = tr(lv.hint) + "\n" + line if lv.hint != "" else line
 
 

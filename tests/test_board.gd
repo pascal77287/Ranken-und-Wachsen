@@ -122,6 +122,20 @@ func _test_multiple_goals() -> void:
 	var t := BoardState.new(_level(["1Z.", ".2Z"]))
 	t.step(1, Vector2i(1, 0))
 	_check(t.is_finished(1), "jede Ranke darf in jede Blüte")
+	var u := BoardState.new(_level(["1.Z", "2.Z"]))
+	u.step(0, Vector2i(1, 0))
+	u.step(0, Vector2i(2, 0))
+	u.step(1, Vector2i(1, 1))
+	_check(u.closed_goal_count() == 1, "untere Blüte noch geschlossen")
+	var v := BoardState.new(_level(["1..", "2.Z", "..Z"]))
+	for c in [Vector2i(1, 0), Vector2i(2, 0), Vector2i(2, 1)]:
+		v.step(0, c)
+	for c in [Vector2i(0, 2), Vector2i(1, 2), Vector2i(1, 1)]:
+		v.step(1, c)
+	_check(v.free_cell_count() == 0 and v.finished_count() == 1, "alles bedeckt, Ranke 2 noch offen")
+	_check(v.step(1, Vector2i(2, 1)) == BoardState.Step.GROW, "Ranke 2 darf in dieselbe Blüte")
+	_check(not v.is_won(), "nicht gewonnen: eine Blüte ist nicht erblüht")
+	_check(not _level(["1.Z", "..Z"]).errors.is_empty(), "weniger Ranken als Blüten ist ein Fehler")
 	_check(not _level(["1Z.Z.Z.Z"]).errors.is_empty(), "höchstens 3 Blüten")
 	_check(not _level(["12345", "Z...."]).errors.is_empty(), "eine Blüte nimmt höchstens 4 Ranken auf")
 

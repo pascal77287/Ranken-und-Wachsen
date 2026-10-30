@@ -91,6 +91,8 @@ static func from_dict(d: Dictionary) -> LevelData:
 		lv.errors.append("Keine Ziel-Knospe")
 	if lv.goals.size() > MAX_GOALS:
 		lv.errors.append("Höchstens %d Blüten" % MAX_GOALS)
+	if lv.starts.size() < lv.goals.size():
+		lv.errors.append("Weniger Ranken als Blüten (jede Blüte muss erblühen)")
 	if lv.starts.size() > 4 * lv.goals.size():
 		lv.errors.append("Zu viele Startknospen (jede Ranke braucht eine Seite einer Blüte)")
 

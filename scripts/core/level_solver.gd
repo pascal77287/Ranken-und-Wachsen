@@ -3,7 +3,7 @@ extends RefCounted
 ## Tiefensuche über alle Rankenverläufe. Zählt Lösungen bis `limit`.
 ## Wird nur im Prüfwerkzeug verwendet, nicht im Spiel.
 ##
-## Jede Ranke muss in einer Blüte enden. Daraus folgt: Jedes freie
+## Jede Ranke muss in einer Blüte enden, und jede Blüte muss erblühen. Daraus folgt: Jedes freie
 ## Feld liegt mitten in einer Ranke und braucht einen Vorgänger und einen Nachfolger.
 ## Kreuzungen werden geradeaus durchquert und zählen in den Abschätzungen
 ## grosszügig als Anschluss, damit keine Lösung verloren geht.
@@ -52,6 +52,8 @@ func _extend(i: int) -> void:
 	var path: Array = _paths[i]
 	var t: Vector2i = path[-1]
 	if level.is_goal(t):
+		if _closed_goals(i) > level.starts.size() - i - 1:
+			return  # zu wenige Ranken übrig, um alle Blüten zu erreichen
 		if i + 1 == level.starts.size():
 			if _all_covered():
 				solutions += 1
@@ -102,6 +104,18 @@ func _all_covered() -> bool:
 		if use[0] == -1 or use[1] == -1:
 			return false
 	return true
+
+
+## Blüten, in denen keine der Ranken 0..i endet.
+func _closed_goals(i: int) -> int:
+	var n := 0
+	for g in level.goals:
+		var reached := false
+		for k in i + 1:
+			reached = reached or _paths[k][-1] == g
+		if not reached:
+			n += 1
+	return n
 
 
 func _is_plain(c: Vector2i) -> bool:
