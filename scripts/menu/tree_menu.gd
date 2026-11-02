@@ -24,6 +24,8 @@ var _time := 0.0
 var _buds: Array[Dictionary] = []  # {chapter, index, pos (Baumkoordinaten), side}
 var _chapter_spans: Array[Vector2] = []  # pro Kapitel: (y_unten, y_oben)
 var _font: Font
+var _settings_button: IconButton
+var _top := 52.0  # oberer Rand der Kopfzeile (Safe Area)
 
 
 func _ready() -> void:
@@ -39,11 +41,19 @@ func _ready() -> void:
 	settings.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	settings.offset_left = -116
 	settings.offset_right = -20
-	settings.offset_top = 52
-	settings.offset_bottom = 148
 	settings.pressed.connect(settings_requested.emit)
 	add_child(settings)
+	_settings_button = settings
+	_apply_safe_area()
+	get_viewport().size_changed.connect(_apply_safe_area)
 	_build_layout()
+
+
+func _apply_safe_area() -> void:
+	_top = UiTheme.safe_top(self)
+	_settings_button.offset_top = _top
+	_settings_button.offset_bottom = _top + 96
+	queue_redraw()
 
 
 func _build_layout() -> void:
@@ -174,9 +184,23 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO)
 
 	var sky := Color("#e8f1f0")
-	draw_rect(Rect2(0, 0, size.x, 150), sky)
-	Art.vertical_gradient(self, Rect2(0, 150, size.x, 70), sky, Color(sky, 0.0))
-	draw_string(_font, Vector2(36, 118), tr("Wachsen & Verflechten"), HORIZONTAL_ALIGNMENT_LEFT, size.x - 170, 44, Art.INK)
+	var band := _top + 98.0
+	draw_rect(Rect2(0, 0, size.x, band), sky)
+	Art.vertical_gradient(self, Rect2(0, band, size.x, 70), sky, Color(sky, 0.0))
+	_draw_title()
+
+
+## Titel mittig über die ganze Breite, auf gleicher Höhe wie der Einstellungen-Button.
+## Wird kleiner, falls er sonst in den Button hineinragen würde.
+func _draw_title() -> void:
+	var text := tr("Wachsen & Verflechten")
+	var avail := size.x - 2.0 * 124.0  # Button (96 + 20 Rand) plus etwas Luft, beidseitig
+	var font_size := 44
+	while font_size > 24 and _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > avail:
+		font_size -= 2
+	var mid := _top + 48.0
+	var baseline := mid + (_font.get_ascent(font_size) - _font.get_descent(font_size)) / 2.0
+	draw_string(_font, Vector2(0, baseline), text, HORIZONTAL_ALIGNMENT_CENTER, size.x, font_size, Art.INK)
 
 
 func _draw_ground() -> void:

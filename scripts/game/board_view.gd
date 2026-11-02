@@ -381,7 +381,13 @@ func _draw_goal(g: int) -> void:
 	var reached := false
 	for i in state.paths.size():
 		reached = reached or state.tip(i) == cell
-	var open := _progress(cell, 0.05, 0.5) if reached else 0.0
+	# Die Blüte öffnet sich erst, wenn das ganze Level gelöst ist; bis dahin
+	# zeigt ein sanftes Leuchten, dass eine Ranke angekommen ist.
+	var open := clampf((_time - _win_start - 0.05) / 0.5, 0.0, 1.0) if _won else 0.0
+	if reached and open < 1.0:
+		var glow := _progress(cell, 0.0, 0.3) * (1.0 - open)
+		draw_circle(c, _cell * 0.46, Color(Art.GOAL_LIGHT, 0.35 * glow), true, -1.0, true)
+		draw_circle(c, _cell * 0.38, Color(Art.GOAL_LIGHT, 0.45 * glow), true, -1.0, true)
 	if open < 1.0:
 		Art.draw_bud(self, c, _cell * 0.34 * (1.0 - open * 0.6), Art.GOAL)
 	if open > 0.0:

@@ -16,6 +16,7 @@ var _status := Label.new()
 var _win_panel := PanelContainer.new()
 var _win_title := Label.new()
 var _next_button := Button.new()
+var _top := MarginContainer.new()
 
 
 func _ready() -> void:
@@ -26,18 +27,23 @@ func _ready() -> void:
 	root.add_theme_constant_override("separation", 16)
 	add_child(root)
 
-	var top := MarginContainer.new()
-	top.add_theme_constant_override("margin_left", 20)
-	top.add_theme_constant_override("margin_right", 20)
-	top.add_theme_constant_override("margin_top", 52)
-	root.add_child(top)
+	_top.add_theme_constant_override("margin_left", 20)
+	_top.add_theme_constant_override("margin_right", 20)
+	root.add_child(_top)
+	_apply_safe_area()
+	get_viewport().size_changed.connect(_apply_safe_area)
 	var bar := HBoxContainer.new()
-	top.add_child(bar)
+	_top.add_child(bar)
 
 	var back := IconButton.new(IconButton.Kind.BACK)
 	back.tooltip_text = tr("Zum Lebensbaum")
 	back.pressed.connect(back_requested.emit)
 	bar.add_child(back)
+	# Platzhalter, damit der Titel trotz zwei Buttons rechts mittig steht
+	var spacer := Control.new()
+	spacer.custom_minimum_size = back.custom_minimum_size
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.add_child(spacer)
 
 	var titles := VBoxContainer.new()
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -86,6 +92,10 @@ func _ready() -> void:
 	_build_win_panel()
 
 
+func _apply_safe_area() -> void:
+	_top.add_theme_constant_override("margin_top", int(UiTheme.safe_top(self)))
+
+
 func _build_win_panel() -> void:
 	var center := CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -96,7 +106,7 @@ func _build_win_panel() -> void:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 22)
 	_win_panel.add_child(box)
-	_win_title.text = tr("Erblüht!")
+	_win_title.text = tr("Geschafft!")
 	_win_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_win_title.add_theme_font_size_override("font_size", 52)
 	_win_title.add_theme_color_override("font_color", Art.CREAM)

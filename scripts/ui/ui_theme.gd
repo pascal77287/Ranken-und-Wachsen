@@ -55,3 +55,17 @@ static func _focus_ring() -> StyleBoxFlat:
 	s.set_expand_margin_all(6)
 	s.anti_aliasing = true
 	return s
+
+
+## Oberer Rand in Viewport-Koordinaten, der frei bleiben muss (Kamera-Aussparung,
+## Statusleiste). Mindestens `minimum`, sonst die Safe Area plus etwas Luft.
+static func safe_top(ctrl: Control, minimum := 52.0, gap := 20.0) -> float:
+	var win := DisplayServer.window_get_size()
+	if win.y <= 0:
+		return minimum
+	var safe := DisplayServer.get_display_safe_area()
+	var inset := float(safe.position.y - DisplayServer.window_get_position().y)
+	if inset <= 0.0:
+		return minimum
+	var scale := ctrl.get_viewport_rect().size.y / float(win.y)
+	return maxf(minimum, inset * scale + gap)
