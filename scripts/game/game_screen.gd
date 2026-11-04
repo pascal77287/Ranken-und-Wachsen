@@ -17,6 +17,7 @@ var _win_panel := PanelContainer.new()
 var _win_title := Label.new()
 var _next_button := Button.new()
 var _top := MarginContainer.new()
+var _buttons_width := 0.0  # Breite der vier Knöpfe samt Abständen in der Kopfzeile
 
 
 func _ready() -> void:
@@ -50,10 +51,14 @@ func _ready() -> void:
 	titles.alignment = BoxContainer.ALIGNMENT_CENTER
 	titles.add_theme_constant_override("separation", 0)
 	bar.add_child(titles)
-	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# Lange Namen dürfen die Kopfzeile nicht über den Bildschirm hinaus
+	# verbreitern; die Schrift wird stattdessen kleiner (siehe _fit_titles).
+	for label in [_title, _subtitle]:
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.clip_text = true
+		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_title.add_theme_font_size_override("font_size", 40)
 	titles.add_child(_title)
-	_subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_subtitle.add_theme_font_size_override("font_size", 24)
 	_subtitle.add_theme_color_override("font_color", Art.INK_SOFT)
 	titles.add_child(_subtitle)
@@ -66,6 +71,8 @@ func _ready() -> void:
 	settings.tooltip_text = tr("Einstellungen")
 	settings.pressed.connect(settings_requested.emit)
 	bar.add_child(settings)
+	_buttons_width = 4.0 * back.custom_minimum_size.x + 4.0 * bar.get_theme_constant("separation")
+	resized.connect(_fit_titles)
 
 	var board_margin := MarginContainer.new()
 	board_margin.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -129,7 +136,23 @@ func open_level(chapter_index: int, level_index: int) -> void:
 	_title.text = lv.name
 	_subtitle.text = "%s · %s" % [tr(LevelDB.chapters[chapter].name), lv.id]
 	_win_panel.visible = false
+	_fit_titles()
 	_board.load_level(lv)
+
+
+## Verkleinert Titel und Untertitel, bis sie neben die Knöpfe passen.
+func _fit_titles() -> void:
+	var avail := size.x - 40.0 - _buttons_width
+	_fit_label(_title, avail, 40, 26)
+	_fit_label(_subtitle, avail, 24, 18)
+
+
+func _fit_label(label: Label, avail: float, max_size: int, min_size: int) -> void:
+	var font := label.get_theme_font("font")
+	var font_size := max_size
+	while font_size > min_size and font.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > avail:
+		font_size -= 2
+	label.add_theme_font_size_override("font_size", font_size)
 
 
 func _on_reset() -> void:
