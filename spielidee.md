@@ -114,7 +114,7 @@ Akustisch (Dynamic Audio):
 
 
 
-Sanfter, meditativer Grundsoundtrack (Kalimba, Akustikgitarre, Synth-Pads).
+Keine Hintergrundmusik, nur Soundeffekte. (Geändert am 04.11.2026, #8; ursprünglich ein sanfter, meditativer Grundsoundtrack.)
 
 
 

@@ -1,6 +1,6 @@
 class_name SettingsOverlay
 extends Control
-## Unaufdringliches Holzschild mit Einstellungen (Klänge, Musik, Vibration,
+## Unaufdringliches Holzschild mit Einstellungen (Klänge, Vibration,
 ## Schwierigkeit, Reset).
 
 signal closed
@@ -41,7 +41,6 @@ func _ready() -> void:
 	box.add_child(title)
 
 	_add_toggle(box, tr("Klänge"), "sound")
-	_add_toggle(box, tr("Musik"), "music")
 	_add_toggle(box, tr("Vibration"), "haptics")
 	_add_toggle(box, tr("Keine Teilschlangen"), Progress.NO_PARTIAL)
 	var note := Label.new()
